@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
-from model import Net
-from data_loader import MNISTLoader
+from model import Net, FCNLeakyReLU
+from data_loader import FC_MNIST_Loader
 from trainer import Trainer
 
 
@@ -27,6 +27,7 @@ def main():
     parser.add_argument('--save-model', action='store_true')
     # 'Adam', 'SGD'
     parser.add_argument('--optimizer', type=str)
+    parser.add_argument('--permute-interval', type=int, default=2500)
 
     args = parser.parse_args()
 
@@ -42,13 +43,16 @@ def main():
     else:
         device = T.device("cpu")
 
-    data_loader = MNISTLoader(
+    data_loader = FC_MNIST_Loader(
         no_accel=args.no_accel,
         train_batch_size=args.batch_size,
         test_batch_size=args.test_batch_size,
     )
 
-    model = Net().to(device)
+    model = FCNLeakyReLU(
+        n_inputs=28*28,
+        n_outputs=10,
+    ).to(device)
 
     if args.optimizer == "Adam":
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -60,17 +64,14 @@ def main():
         optimizer=optimizer,
         data_loader=data_loader,
         device=device,
-        permute_interval=5000,
+        permute_interval=args.permute_interval,
     )
 
-    for epoch in range(1, args.epochs + 1):
-        trainer.train_epoch()
-        _, average_accuracy = trainer.test()
-        self.writer.add_scalar(
-            f"{args.optimizer}/AvgAcc/Test",
-            average_accuracy,
-            epoch,
-        )
+    trainer.train_steps(
+        steps=200*args.permute_interval,
+        writer=writer,
+        writer_tag=f"{args.optimizer}/OnlineAvgAcc/step",
+    )
 
     if args.save_model:
         T.save(model.state_dict(), "mnist_cnn.pt")

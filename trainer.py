@@ -30,6 +30,72 @@ class Trainer():
         self.num_steps = 1
         self.num_epochs = 1
 
+        self.criterion = nn.CrossEntropyLoss()
+
+    def train_steps(
+        self,
+        steps: int,
+        writer: SummaryWriter,
+        writer_tag: str,
+    ):
+
+        # Toggle model to train mode
+        self.model.train()
+
+        correct = 0
+        while steps > 0:
+
+            # Load batch using DataLoader
+            progress_bar = tqdm(
+                self.data_loader.train_loader,
+                desc=f"Epoch {self.num_epochs}"
+            )
+            for data, target in progress_bar:
+
+                data, target = data.to(self.device), target.to(self.device)
+                self.optimizer.zero_grad()
+                output = self.model(data)
+                loss = self.criterion(output, target)  # Negative Loss Likelihood
+                loss.backward()  # Calculate gradients
+                self.optimizer.step()  # update weights
+
+                self.num_steps += 1
+
+                # Permute every self.permute_interval step
+                if self.num_steps % self.permute_interval == 0:
+                    self.data_loader.permute()
+
+                steps -= 1  # count step
+                if steps <= 0:
+                    break
+
+                # =======================
+                # Average Online Accuracy
+                # =======================
+
+                pred = output.argmax(dim=1, keepdim=True)
+                # Count the number of correct prediction
+                correct += pred.eq(target.view_as(pred)).sum().item()
+                average_online_accuracy = correct / self.num_steps
+
+                progress_bar.set_postfix({
+                    'Loss': f"{loss.detach().cpu().item():.4f}",
+                    'Online Avg Acc': f"{average_online_accuracy:.2f}",
+                    'Num Steps': self.num_steps,
+                })
+
+                # Tensorboard
+                writer.add_scalar(
+                    writer_tag,
+                    average_online_accuracy,
+                    self.num_steps,
+                )
+
+                # =======================
+
+
+        self.num_epochs += 1
+
 
     def train_epoch(
         self,
@@ -43,12 +109,13 @@ class Trainer():
             self.data_loader.train_loader,
             desc=f"Epoch {self.num_epochs}"
         )
+
         for data, target in progress_bar:
 
             data, target = data.to(self.device), target.to(self.device)
             self.optimizer.zero_grad()
             output = self.model(data)
-            loss = F.nll_loss(output, target)  # Negative Loss Likelihood
+            loss = self.criterion(output, target)  # Negative Loss Likelihood
             loss.backward()  # Calculate gradients
             self.optimizer.step()  # update weights
 
@@ -84,7 +151,7 @@ class Trainer():
             for data, target in progress_bar:
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
-                test_loss += F.nll_loss(output, target, reduction='sum').item()
+                test_loss += self.criterion(output, target, reduction='sum').item()
                 pred = output.argmax(dim=1, keepdim=True)
                 # Count the number of correct prediction
                 correct += pred.eq(target.view_as(pred)).sum().item()

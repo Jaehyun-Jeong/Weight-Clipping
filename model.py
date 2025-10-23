@@ -7,25 +7,29 @@ class FCNLeakyReLU(nn.Module):
 
     def __init__(
         self,
-        n_obs=10,
-        n_outputs=10,
+        n_inputs: int,
+        n_outputs: int,
         n_hidden_units=300
     ):
 
         super().__init__()
 
-        self.linear()
-        self.add_module("linear_1", nn.Linear(in_features=n_obs, out_features=n_hidden_units))
-        self.add_module("act_1", nn.LeakyReLU())
-        self.add_module("linear_2", nn.Linear(in_features=n_hidden_units, out_features=n_hidden_units // 2))
-        self.add_module("act_2", nn.LeakyReLU())
-        self.add_module("linear_3", nn.Linear(in_features=n_hidden_units // 2, out_features=n_outputs))
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                m.reset_parameters()
+        self.linear1 = nn.Linear(n_inputs, n_hidden_units)
+        self.leaky_relu1 = nn.LeakyReLU()
+        self.linear2 = nn.Linear(n_hidden_units, n_hidden_units // 2)
+        self.leaky_relu2 = nn.LeakyReLU()
+        self.linear3 = nn.Linear(n_hidden_units // 2, n_outputs)
 
-    def __str__(self):
-        return self.name
+
+    def forward(self, x):
+
+        x = self.linear1(x)
+        x = self.leaky_relu1(x)
+        x = self.linear2(x)
+        x = self.leaky_relu2(x)
+        x = self.linear3(x)
+
+        return x
 
 
 class Net(nn.Module):

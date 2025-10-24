@@ -1,3 +1,5 @@
+import math as ma
+
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,6 +22,8 @@ class FCNLeakyReLU(nn.Module):
         self.leaky_relu2 = nn.LeakyReLU()
         self.linear3 = nn.Linear(n_hidden_units // 2, n_outputs)
 
+        self.weight_init()
+
 
     def forward(self, x):
 
@@ -30,6 +34,41 @@ class FCNLeakyReLU(nn.Module):
         x = self.linear3(x)
 
         return x
+
+    # Initialization using uniform(-1/sqrt(fan_in), 1/sqrt(fan_in))
+    def weight_init(
+        self
+    ):
+
+        weights = [
+            self.linear1.weight,
+            self.linear2.weight,
+            self.linear3.weight,
+        ]
+        biases = [
+            self.linear1.bias,
+            self.linear2.bias,
+            self.linear3.bias,
+        ]
+        fan_ins = [
+            self.linear1.weight.shape[1],
+            self.linear2.weight.shape[1],
+            self.linear3.weight.shape[1],
+        ]
+
+        len_layers = len(weights)
+
+        with T.no_grad():
+            for weight, bias, fan_in in zip(weights, biases, fan_ins):
+                weight.uniform_(-1/ma.sqrt(fan_in), 1/ma.sqrt(fan_in))
+                bias.zero_()
+
+                ''' Check proper working
+                print(f"upper: {1/ma.sqrt(fan_in)}")
+                print(f"lower: {-1/ma.sqrt(fan_in)}")
+                print(f"max: {T.max(weight)}")
+                print(f"min: {T.min(weight)}")
+                '''
 
 
 class Net(nn.Module):

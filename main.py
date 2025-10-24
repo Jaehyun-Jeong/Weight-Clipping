@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 from model import Net, FCNLeakyReLU
 from data_loader import FC_MNIST_Loader
 from trainer import Trainer
+from optimizer import AdamWC
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
     # 'Adam', 'SGD'
     parser.add_argument('--optimizer', type=str)
     parser.add_argument('--permute-interval', type=int, default=2500)
+    parser.add_argument('--clipping', type=float, default=2)
 
     args = parser.parse_args()
 
@@ -54,8 +56,13 @@ def main():
         n_outputs=10,
     ).to(device)
 
+    for param in model.parameters():
+        print(param.shape)
+
     if args.optimizer == "Adam":
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    elif args.optimizer == "AdamWC":
+        optimizer = AdamWC(k=args.clipping, params=model.parameters(), lr=args.lr)
     elif args.optimizer == "SGD":
         optimizer = optim.SGD(model.parameters(), lr=args.lr)
 

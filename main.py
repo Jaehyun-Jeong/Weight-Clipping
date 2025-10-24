@@ -1,16 +1,16 @@
 import argparse
+from argparse import Namespace
 import torch as T
 import torch.nn.functional as F
-import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 from model import Net, FCNLeakyReLU
 from data_loader import FC_MNIST_Loader
 from trainer import Trainer
-from optimizer import AdamWC
+from optimizer import optimizer_selector
 
 
-def main():
+def get_args() -> Namespace:
 
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     # Streaming learning setting
@@ -30,8 +30,16 @@ def main():
     parser.add_argument('--optimizer', type=str)
     parser.add_argument('--permute-interval', type=int, default=2500)
     parser.add_argument('--clipping', type=float, default=2)
+    parser.add_argument('--weight-decay', type=float, default=0.)
 
     args = parser.parse_args()
+
+    return args
+
+
+def main():
+
+    args = get_args()
 
     writer = SummaryWriter()
 
@@ -56,15 +64,10 @@ def main():
         n_outputs=10,
     ).to(device)
 
-    for param in model.parameters():
-        print(param.shape)
-
-    if args.optimizer == "Adam":
-        optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    elif args.optimizer == "AdamWC":
-        optimizer = AdamWC(k=args.clipping, params=model.parameters(), lr=args.lr)
-    elif args.optimizer == "SGD":
-        optimizer = optim.SGD(model.parameters(), lr=args.lr)
+    optimizer = optimizer_selector(
+        model,
+        args,
+    )
 
     trainer = Trainer(
         model=model,
@@ -79,9 +82,6 @@ def main():
         writer=writer,
         writer_tag=f"{args.optimizer}/OnlineAvgAcc/step",
     )
-
-    if args.save_model:
-        T.save(model.state_dict(), "mnist_cnn.pt")
 
 
 if __name__ == '__main__':

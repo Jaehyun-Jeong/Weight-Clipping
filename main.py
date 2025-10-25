@@ -80,7 +80,7 @@ def main():
     trainer.train_steps(
         steps=200*args.permute_interval,
         writer=writer,
-        writer_tag=f"{args.optimizer}/OnlineAvgAcc/step",
+        writer_tag=f"/OnlineAvgAcc/{args.optimizer}/step",
     )
 
 

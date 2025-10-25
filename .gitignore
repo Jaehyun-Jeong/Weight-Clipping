@@ -1,3 +1,4 @@
 # IGNORE FOLDERS
 
 **__pycache__/
+**/*.out

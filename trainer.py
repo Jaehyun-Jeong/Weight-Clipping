@@ -93,8 +93,7 @@ class Trainer():
 
                 # =======================
 
-
-        self.num_epochs += 1
+            self.num_epochs += 1
 
 
     def train_epoch(

@@ -100,20 +100,21 @@ class Permutation:
 
 ## Experiments
 
-*What I get from my own experiments*
+**Results from My Experiments**
 |Input-permuted MNIST                               |Label-permuted EMNIST                                |Label-permuted mini-ImageNet   |
 :--------------------------------------------------:|:---------------------------------------------------:|:-----------------------------:|
 |![input-permuted MNIST](./IP-MNIST_experiments.png)|![label-permuted EMNIST](./LP-EMNIST_experiments.png)|![label-permuted mini-ImageNet](./LP-MINI-IMAGENET_experiments.png)|
 
-*results from the paper*<br>
+**Results Reported in the Paper**<br>
 ![experiments in the paper](./papers_experiments.png)
+*Elsayed, M., Lan, Q., Lyle, C., & Mahmood, A. R., 2024*
 
-* Input-permuted MNIST
-    * I tested from task 400 tasks (step = 200(the number of tasks) * 5000(permutation interval))
-    * As it shows, SGD and Adam showed consistent dropping as task changes. However, their decreasing is slow compared to the result in the paper.
+- **Input-permuted MNIST**
+  - I trained **400 tasks** (steps = **200** tasks × **5,000** permutation-interval).
+  - As shown, **SGD** and **Adam** consistently **degrade** as tasks change. however, the **decline is slower** than in the paper.
 
-* Label-permuted EMNIST
-    * I tested from task 200 tasks (step = 200(the number of tasks) * 2500(permutation interval))
+- **Label-permuted EMNIST**
+  - I trained **200 tasks** (steps = **200** tasks × **2,500** permutation-interval).
 
-* Label-permuted mini-ImageNet
-    * I tested from task 200 tasks (step = 200(the number of tasks) * 2500(permutation interval))
+- **Label-permuted mini-ImageNet**
+  - I trained **200 tasks** (steps = **200** tasks × **2,500** permutation-interval).

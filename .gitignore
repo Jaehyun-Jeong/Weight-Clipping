@@ -1,0 +1,6 @@
+# IGNORE FOLDERS
+
+**__pycache__/
+**/*.out
+**dataset/
+**runs/

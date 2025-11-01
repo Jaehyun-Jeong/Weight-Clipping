@@ -30,6 +30,7 @@ def get_args() -> Namespace:
     parser.add_argument("--optimizer", type=str)
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--permute-interval", type=int, default=5000)
+    parser.add_argument("--tasks", type=int)
     parser.add_argument("--clipping", type=float, default=2)
     parser.add_argument("--weight-decay", type=float, default=0.0)
 
@@ -80,7 +81,7 @@ def main():
     )
 
     trainer.train_steps(
-        steps=200 * args.permute_interval,
+        steps=args.tasks * args.permute_interval,
         seed=args.seed,
         writer=writer,
         writer_tag=args.optimizer,

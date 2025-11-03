@@ -293,7 +293,7 @@ class LP_MINI_IMAGENET_Loader(Loader):
         )
 
         self.train_loader = T.utils.data.DataLoader(
-            self.mini_imagenet_dataset, shuffle=True, **self.train_kwargs
+            self.mini_imagenet_dataset, **self.train_kwargs
         )
 
         self.test_loader = None
@@ -320,7 +320,7 @@ class LP_MINI_IMAGENET_Loader(Loader):
                 transform=transform,
             )
 
-            batch_size = 10000
+            batch_size = 100
             self.train_kwargs["batch_size"] = batch_size
             self.train_loader = T.utils.data.DataLoader(
                 self.mini_imagenet_dataset, **self.train_kwargs

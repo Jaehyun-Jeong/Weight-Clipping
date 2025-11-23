@@ -117,4 +117,4 @@ class Permutation:
   - I trained **200 tasks** (steps = **200** tasks × **2,500** permutation-interval).
 
 - **Label-permuted mini-ImageNet**
-  - I trained **200 tasks** (steps = **200** tasks × **2,500** permutation-interval).
+  - I trained **400 tasks** (steps = **200** tasks × **2,500** permutation-interval).
